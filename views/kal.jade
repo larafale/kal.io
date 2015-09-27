@@ -1,0 +1,224 @@
+extends layout
+
+
+block script
+  script(src='/js/mousetrap.js')
+  script(src='/js/datepicker/bootstrap-datepicker.js')
+  script(src='/js/datepicker/locales/bootstrap-datepicker.fr.js')
+  link(rel='stylesheet', href='/js/datepicker/datepicker.css', type='text/css')
+
+  script(src='/js/kal.io.js')
+  script.
+    $vue.$data.user = !{JSON.stringify((session && session.user) || { name: 'anonyme' })}
+    $vue.$data.account = !{JSON.stringify((session && session.account) || {})}
+    $vue.$data.options = $vue.$data.account.config
+    $vue.$data.panel = {
+      admin: false,
+      datepicker: false
+    }
+    
+    $vue.init()
+
+
+    var panel = function(panel, mode){
+      typeof mode === 'undefined'
+        ? $vue.$data.panel[panel] = !$vue.$data.panel[panel] 
+        : $vue.$data.panel[panel] = mode 
+    }
+
+    if($vue.$data.user.role == 'admin')
+      $('iframe').attr('src', '/'+$vue.$data.account.namespace+'/admin')
+
+    var dp = $('#datepicker .wrapper div').datepicker({
+      language: 'fr',
+      todayHighlight: true,
+      todayBtn: 'linked'
+    })
+
+    dp.on('changeDate', function(d){
+      panel('datepicker', false)
+      $vue.setDay(moment(d.date).format())
+    })
+
+    Mousetrap
+      .bind('a', function(){ panel('admin') })
+      .bind('d', function(){ panel('datepicker') })
+      .bind('t', function(){ $vue.setDay() })
+      .bind('left', function(){ $vue.prevDay() })
+      .bind('right', function(){ $vue.nextDay() })
+      .bind('up', function(){ $vue.setWeek(-1) })
+      .bind('down', function(){ $vue.setWeek(+1) })
+
+block body
+
+  style.
+
+    #reza .submit { width: 100%; }
+    .icon { color: #fff; }
+    .tooltip-inner { background-color: #282828; }
+    .tooltip.bottom .tooltip-arrow { border-bottom-color: #282828; }
+    
+    #datepicker {
+      position: fixed;
+      top: 40px;
+      height: 100%;
+      width: 100%;
+      margin: 0 auto;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 101;
+    }
+
+    #datepicker .wrapper {
+      margin: 0 auto;
+      width: 260px;
+      padding: 20px;
+      background-color: white;
+      margin-top: 50px;
+      border-radius: 4px;
+    }
+
+    iframe {
+      position: absolute;
+      top: 46px;
+      height: 100%;
+      margin: 0 auto;
+      width: 100%;
+      max-width: 1200px;
+      z-index: 101;
+      right: 0;
+      left: 0;
+      border: 0;
+    }
+
+    
+
+  //- pre {{json(users)}}
+  //- pre #{JSON.stringify(users, null, 4)}
+
+  #datepicker(v-class='hide: !panel.datepicker')
+    .wrapper
+      div
+
+
+  #menu
+    .items
+      a(href='javascript:').pull-left: img(src="/img/kalio.png", width="120px")
+      h1.hidden-xs {{account.namespace}}
+      h2 
+        span.hidden-xs {{user.name}} 
+        if isLogged
+          a.fa.fa-times-circle(href='/signout', title='déconnexion', style='color: #fff;')
+      .icons.pull-right(style="margin: 13px;")
+        a.fa.fa-calendar(href='javascript:', onclick='panel("datepicker")', title='raccourci = d', style='margin-right: 10px;')
+        if isAdmin
+          a.fa.fa-cog(href='javascript:', onclick='panel("admin")', title='raccourci = a', style='')
+        if !isLogged
+          a.fa.fa-sign-in(href='/signin', title='connexion', style='')
+
+  #admin(v-class='hide: !panel.admin')
+    iframe
+
+  #container
+
+    #kal
+      .header(v-style='width: (config.fullWidth) + "px"')
+        .calendar
+          ul.week
+            li.day.nav(v-on="click: setWeek(-1)"): i.fa.fa-chevron-left
+            li.day(v-repeat="d: config.week", v-class="current: isCurrentDay(d[3]), disabled: isUnday(d[3])", v-on="click: setDay(d[4])") 
+              span.d {{d[0]}}
+              .clearfix
+              span.dd {{d[1]}}
+              .clearfix
+              span.d.hidden-xs {{d[2]}}
+            li.day.nav(v-on="click: setWeek(+1)"): i.fa.fa-chevron-right
+        
+        .ruler &nbsp;
+
+        .legend
+          ul.content
+            li(v-repeat='hour: config.legend', v-style='width: (config.width) + "px"')
+              span.hour {{hour}}h
+              | &nbsp;
+              span.hour.right(v-if='(config.legend.length-1) == $index') {{options.to}}h
+      
+      .sources(v-style='width: (config.fullWidth) + "px"')
+        .source(index='{{$index}}', v-repeat='s: sources',  v-show='s.show !== false && (!s.hideIfNoData || s.data.length)')
+          .title
+            span {{s.title}}
+
+          //- .timeline(v-class='highlight: options.highlight || s.highlight, inProcess: config.selection.inProcess')
+          .timeline(v-class='inProcess: selection.inProcess')
+            span.block.unzone(v-repeat='b: s.unzones||options.unzones', style="{{draw(b)}}")  &nbsp; 
+            span.grid.needsclick(index='{{$index}}', id="grid-{{$parent.$index}}-{{$index}}", v-repeat='g: config.grids[s.record]', style="{{draw(g, true)}}", v-on="click: select($event, s)") &nbsp;
+            span(v-repeat='b: s.data')
+              span(class="block {{blockColor(s, b)}} outline v-enter", style="{{draw(b)}};", v-on='click: showReservation(b)', data-toggle="tooltip", title="{{ (user.role == 'admin' || b.user == user.record) && b.note }}", data-placement="bottom")
+                div.preview.hidden-xs()
+                  //- span(v-if='users[b.user].role != "admin"') {{users[b.user].name}}
+                  span {{users[b.user] && users[b.user].name}}
+                  .clearfix 
+                  small {{inHours(b.duration, 'H·mm')}}
+                  .clearfix 
+                  span(v-if='resources[b.sharedWith] && !s.shareable') {{resources[b.sharedWith].title}} 
+                  span(v-if='b.linkedWith && s.shareable') {{b.linkedWith}} 
+        //- .pusher(style='height:1px; border-bottom: 1px solid #fff;margin-bottom: 100px;')
+  
+        
+
+    .container
+      #reza(v-class='open: config.display', v-on='click: hideReservation($event)')
+        .box
+          i.fa.fa-times-circle.close-box(v-on='click: hideReservation($event)')
+          .row
+            .col-md-6.col-xs-6
+              form.form-horizontal(role='form')
+                .form-group
+                  label.col-sm-3.control-label.hidden-xs Date
+                  .col-sm-9
+                    p.form-control-static {{calendar('ddd DD MMM', 'now')}}
+                .form-group
+                  label.col-sm-3.control-label.hidden-xs Heure
+                  .col-sm-9
+                    p.form-control-static {{calendar('HH\\hmm', reza.start) || '-'}} - {{calendar('HH\\hmm', reza.end) || '-'}}
+                .form-group(v-class='hide: !#{isLogged}')
+                  label.col-sm-3.control-label.hidden-xs Qui
+                  .col-sm-9
+                    p.form-control-static(v-if='"#{session.user && session.user.role}" != "admin"') {{users[reza.user] && users[reza.user].name}}
+                    select.who.form-control.inputs(v-if='"#{session.user && session.user.role}" == "admin"', v-model='reza.user')
+                      //- option(value='') anonyme
+                      option(v-repeat='u: users', value='{{u.record}}', v-attr='selected: u.record == #{session.user && session.user.record}') {{u.name}}
+
+            .col-md-6.col-xs-6
+              form.form-horizontal(role='form')
+                .form-group
+                  label.col-sm-3.control-label.hidden-xs Réza
+                  .col-sm-9
+                    p.form-control-static {{sourcesById[reza.resource] && sourcesById[reza.resource].title || '-'}}
+                .form-group
+                  label.col-sm-3.control-label.hidden-xs Durée
+                  .col-sm-9
+                    p.form-control-static {{calendar('H:mm', reza.duration) || '-'}}
+                .form-group(v-class='hide: !freeSources.length')
+                  label.col-sm-3.control-label.hidden-xs Avec
+                  .col-sm-9
+                    select.with.form-control.inputs(v-model='reza.sharedWith')
+                      option(value='') ---
+                      option(v-repeat='s: freeSources', value='{{s}}') {{sourcesById[s].title}}
+
+          .row
+            .col-md-12
+              textarea.inputs(v-model='reza.note', placeholder="Ajouter une note ...", v-class='hide: !(user.role == "admin" || reza.user == user.record)')
+              a.btn.btn-danger(v-class='hide: !(config.edit && (user.role == "admin" || reza.user == user.record))', v-on='click: deleteReservation()')
+                i.fontawesome-trash
+                |  supprimer
+              a.btn.btn-primary.pull-right(v-class='hide: !(config.edit && (user.role == "admin" || reza.user == user.record))', v-on='click: editReservation()')
+                i.fontawesome-save
+                |  modifier
+
+          .row(v-class='hide: config.edit')
+            .col-md-12
+              a.submit.btn.btn-primary(v-on='click: makeReservation()')
+                | réserver&nbsp;
+
+
+

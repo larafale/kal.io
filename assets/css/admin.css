@@ -1,0 +1,32 @@
+body {
+  background-color: #fff;
+}
+
+.form-control{ 
+  outline: none;
+  box-shadow: none;
+  /*border-radius: 0;*/
+  /*box-shadow: 0 0 3px 0px #E7E7E7 inset;*/
+}
+  
+#resources li table td {
+  /*border-bottom: 1px solid #DDD;*/
+  padding: 20px 0;
+}
+
+
+.green { color: #2ecc71; }
+.red { color: #F45C43; }
+.blue { color: #1DBAF7; }
+.yellow { color: #f1c40f; }
+.orange { color: #e67e22; }
+.grey { color: #504B4B; }
+.purple { color: #910DF8; }
+
+.bg-green { background-color: #2ecc71; }
+.bg-red { background-color: #F45C43; }
+.bg-blue { background-color: #1DBAF7; }
+.bg-yellow { background-color: #f1c40f; }
+.bg-orange { background-color: #e67e22; }
+.bg-grey { background-color: #504B4B; }
+.bg-purple { background-color: #910DF8; }

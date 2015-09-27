@@ -1,0 +1,39 @@
+{
+  "name": "kal.io",
+  "version": "0.0.1",
+  "description": "Making reservation a breez",
+  "main": "index.js",
+  "engines": {
+    "node": "0.10.x",
+    "npm": "2.2.0"
+  },
+  "scripts": {
+    "start": "node-dev server.js",
+    "test": "mocha -R spec"
+  },
+  "keywords": [
+    "reservation",
+    "calendar"
+  ],
+  "author": "Louis Grellet @larafale",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "async": "~0.9.0",
+    "body-parser": "~1.2.2",
+    "connect-mongo": "~0.4.1",
+    "cookie-parser": "~1.1.0",
+    "express": "~4.3.2",
+    "express-session": "~1.2.1",
+    "faker": "^2.0.1",
+    "jade": "~1.3.1",
+    "lodash": "~2.4.1",
+    "moment": "~2.8.1",
+    "mongoose": "~3.8.12",
+    "nodemailer": "~0.7.0",
+    "pow-mongoose-fixtures": "^0.3.0",
+    "serve-favicon": "~2.0.1",
+    "serve-static": "~1.1.0",
+    "superagent": "^1.2.0",
+    "swig": "^1.4.2"
+  }
+}

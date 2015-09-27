@@ -1,0 +1,336 @@
+extends layout
+
+block body
+
+  link(rel='stylesheet', type='text/css', href='/css/admin.css')
+  script(src='/js/sortable.js')
+
+  style.
+    #sort-resources .drag {
+      visibility: hidden;
+    }
+
+    #sort-resources li {
+      cursor: pointer;
+    }
+
+    #sort-resources li:hover .drag {
+      visibility: visible;
+    }
+
+    .head {
+      margin: 20px 0;
+    }
+
+    .head i {
+      color: #282828;
+      font-size: 20px;
+    }
+
+    .nav i {
+      font-size: 14px;
+    }
+
+  
+  .container
+    .row(style="background-color: #fff;")
+      .col-md-12
+        br
+
+        //- .head
+        //-   a(href='/{{account.namespace}}'): i.fa.fa-clock-o
+        //-   h4(style='display: inline;margin-left: 10px;') | &nbsp;&nbsp;{{account.namespace}}
+        //-   a.pull-right(href='/signout'): i.fa.fa-times-circle
+
+        a.pull-right(href='javascript:', onclick='parent.location.reload()', style="font-size: 20px;color: #282828;"): i.fa.fa-times-circle
+        ul.nav.nav-tabs
+          li.active
+            a(href="#resources", data-toggle="tab", onclick='sticky()') 
+              i.fa.fa-list
+              span.hidden-xs &nbsp;Ressources
+          li
+            a(href="#users", data-toggle="tab", onclick='sticky()') 
+              i.fa.fa-male
+              span.hidden-xs &nbsp;Utilisateurs
+          li
+            a(href="#config", data-toggle="tab", onclick='sticky()') 
+              i.fa.fa-cogs
+              span.hidden-xs &nbsp;Paramètres
+
+        br
+
+        .tab-content(style="padding-top: 20px;")
+
+
+
+
+          .tab-pane.active#resources
+
+            .row
+
+              .col-md-8
+                div(v-if="!resources.length")
+                  h2.text-center Ajouter votre 1ère ressource
+                div(v-if="resources.length")
+                  table.table(style="margin: 0")
+                    tr 
+                      th(style="border-top: 0;") Nom
+                      th(width="80px", style="border-top: 0;").hidden-xs.text-center Visible
+                      th(width="80px", style="border-top: 0;").hidden-xs.text-center temps
+                      th(width="80px", style="border-top: 0;") 
+                  ul.list-unstyled#sort-resources
+                    li(v-repeat='r: resources', v-on='click: select("resource", r, $index)', _id='{{r._id}}') 
+                      table.table(style="margin: 0")
+                        tr 
+                          td(width="20px"): i.fa.fa-reorder.drag
+                          td() {{r.title}}
+                          td(width="80px").hidden-xs.text-center: i.fa.fa-eye(v-if="r.show")
+                          td(width="80px").hidden-xs.text-center {{swipe[r.grid]}}
+                          td(width="80px", class="bg-{{r.color}}") &nbsp;
+
+              .col-md-4.sticky
+                form.form
+                  .form-group
+                    input.form-control.ph(type='text', placeholder='Nom de la ressource', v-model='resourceNew.title')
+                  .form-group
+                    select.form-control(v-model='resourceNew.color')
+                      option(value='blue') bleu
+                      option(value='green') vert
+                      option(value='red') rouge
+                      option(value='yellow') jaune
+                      option(value='orange') orange
+                      option(value='grey') gris
+                      option(value='purple') violet
+                  .form-group
+                    select.form-control(v-model='resourceNew.grid')
+                      option(value=1) 1h
+                      option(value=0.5) 30m
+                      option(value=0.25) 15m
+                      option(value=0.16666666666666666) 10m                
+                  .form-group
+                    input.form-control.ph(type='text', placeholder='Emails', v-model='resourceNew.emails')
+                  .form-group
+                    label.checkbox-inline
+                      input(type='checkbox', v-model='resourceNew.show') 
+                      | Visible
+                    label.checkbox-inline
+                      input(type='checkbox', v-model='resourceNew.shareable') 
+                      | Associable
+                    label.checkbox-inline
+                      input(type='checkbox', v-model='resourceNew.selectable') 
+                      | Reservable
+                  .form-group
+                    hr
+                    a.btn.btn-success(v-class='hide: resourceNew && resourceNew._id', v-on='click: save("resource")') 
+                      i.fa.fa-plus
+                      | &nbsp;&nbsp;Ajouter
+                    a.btn.btn-primary(v-class='hide: !resourceNew._id', v-on='click: save("resource")') 
+                      i.fa.fa-save
+                      | &nbsp;&nbsp;Enregistrer
+                    a.btn.btn-danger.pull-right(v-class='hide: !resourceNew._id', v-on='click: remove("resource", resourceNew.record)') 
+                      i.fa.fa-trash
+
+              
+
+
+
+
+
+
+          .tab-pane#users
+            .row
+              .col-md-9
+                table.table.table-striped
+
+                  tr(v-repeat='u: users', v-on='click: select("user", u)', style='cursor: pointer;') 
+                    td {{u.name}}
+                    td.hidden-xs {{u.login}}
+                    td.hidden-xs {{u.phone}}
+                    td(width="10px").hidden-xs {{u.role}}
+                      //- select(v-model='u.role')
+                      //-   option user
+                      //-   option admin
+
+              .col-md-3.sticky
+                form.form(style="margin-bottom: 20px;")
+                  .form-group
+                    input.form-control.ph(type='text', placeholder='Email', v-model='userNew.login')
+                  .form-group
+                    input.form-control.ph(type='password', placeholder='Mot de passe', v-model='userNew.password')
+                  .form-group
+                    input.form-control.ph(type='text', placeholder='Nom', v-model='userNew.name')
+                  .form-group
+                    input.form-control.ph(type='text', placeholder='Téléphone', v-model='userNew.phone')
+                  .form-group
+                    select.form-control(v-model='userNew.role')
+                      option user
+                      option admin
+                  .form-group
+                    a.btn.btn-success(v-class='hide: userNew && userNew._id', v-on='click: save("user")') 
+                      i.fa.fa-plus
+                      | &nbsp;&nbsp;Ajouter
+                    a.btn.btn-primary(v-class='hide: !userNew._id', v-on='click: save("user")') 
+                      i.fa.fa-save
+                      | &nbsp;&nbsp;Enregistrer
+                    a.btn.btn-danger.pull-right(v-class='hide: !userNew._id', v-on='click: remove("user")') 
+                      i.fa.fa-trash
+                
+
+
+
+
+
+          .tab-pane#config
+            .row
+              .col-md-12
+
+                form.form-horizontal
+                  .form-group
+                    label.control-label.col-md-2 Ouvert au public
+                    .col-md-2
+                      input.form-control(type='checkbox', v-model='account.config.public')
+                  .form-group
+                    label.control-label.col-md-2 De
+                    .col-md-2
+                      select.form-control.span2( v-model='account.config.from')
+                        each hour in [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+                          option(value='#{hour}')= hour+'h'
+                  .form-group
+                    label.control-label.col-md-2 à
+                    .col-md-2
+                      select.form-control.span2( v-model='account.config.to')
+                        each hour in [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+                          option(value='#{hour}')= hour+'h'
+                  .form-group
+                    label.control-label.col-md-2 toutes les
+                    .col-md-2
+                      select.form-control.span2(v-model='account.config.grid')
+                        option(value=1) 1h
+                        option(value=0.5) 30m
+                        option(value=0.25) 15m
+                        option(value=0.16666666666666666) 10m 
+
+
+                  .form-group
+                    label.control-label.col-md-2 Jours à cacher
+                    .col-md-2
+                      select.form-control(style='width: 100px; height: 134px;', v-model='account.config.undays', multiple)
+                        option(value="1") lundi
+                        option(value="2") mardi
+                        option(value="3") mercredi
+                        option(value="4") jeudi
+                        option(value="5") vendredi
+                        option(value="6") samedi
+                        option(value="0") dimanche
+                  hr
+
+                  .form-group
+                    .col-md-offset-2.col-md-2
+                      a.btn.btn-primary(v-on='click: save("account", true)') 
+                        i.fa.fa-save
+                        | &nbsp;&nbsp;Enregistrer
+
+block script
+
+  script.
+
+
+    var $vue
+      , $els
+      , $date
+
+    var DEFAULT = {
+      resource: { grid: 1, color: 'blue', show: true, selectable: true, emails: '' },
+      user: { role: 'user' }
+    }
+
+    function sortable(){
+      setTimeout(function(){
+        new Sortable(document.getElementById("sort-resources"), {
+          handle: ".drag",
+          onUpdate: function (evt){
+            var sorted = {}
+
+            $('#sort-resources li').each(function(index, el){
+              sorted[$(el).attr('_id')] = index
+            })
+
+            Api.resource.post('sort', sorted, function(err, res, status){
+              $vue.resources = res.status != 200 ? $vue.resources : res.body.items
+            })
+          }
+        })
+      }, 1000)
+    }
+
+    $vue = new Vue({
+      el: 'body',
+      data: {
+        account: !{JSON.stringify((session && session.account) || {})},
+        users: [],
+        resources: [],
+        userNew: {},
+        resourceNew: {},
+        swipe: {
+            '1': '1h'
+          , '0.5': '30m'
+          , '0.25': '15m'
+          , '0.16666666666666666': '10m'
+        }
+      },
+      methods: {
+        init: function(){
+          this.load('user')
+          this.load('resource', sortable)
+          this.userNew = _.clone(DEFAULT.user)
+          this.resourceNew = _.clone(DEFAULT.resource)
+        },
+        load: function(model, callback){
+          Api[model].all(function(err, res){
+            $vue[model+'s'] = res.body.items
+            callback && callback()
+          })
+        },
+        fetch: function(model, id){
+          Api[model].find(id, function(err, res){
+            $vue[model] = res.body.item
+          })
+        },
+        remove: function(model){
+          if(!confirm("Êtes vous sur ?")) return
+          Api[model].delete($vue[model+'New'].record, function(err, res){
+            if($err(err, res)) return
+            $vue[model+'s'].$remove($vue[model+'New'].$index)
+          })
+        },
+        save: function(model, raw){
+          raw
+            ? Api[model].update($vue[model]._id, $vue[model], function(err, res){
+                if($err(err, res)) return
+                $vue[model] = res.body.item
+              })
+            : $vue[model+'New']._id
+                ? Api[model].update($vue[model+'New']._id, $vue[model+'New'], function(err, res){
+                    if($err(err, res)) return
+                    $vue[model+'s'].$set($vue[model+'New'].$index, res.body.item)
+                    $vue[model+'New'] = _.clone(DEFAULT[model])
+                  })
+                : Api[model].save($vue[model+'New'], function(err, res){
+                    if($err(err, res)) return
+                    $vue[model+'s'].push(res.body.item)
+                    $vue[model+'New'] = _.clone(DEFAULT[model])
+                  })
+        },
+        select: function(model, obj, $index){ // $index is optionnal
+          $vue[model+'New'] = _.clone(obj)
+          if(!$vue[model+'New'].$index) $vue[model+'New'].$index = $index
+          console.log($vue[model+'New'].$index)
+        }
+      }
+    })
+
+    $vue.init()
+
+
+
+

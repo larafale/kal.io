@@ -1,0 +1,71 @@
+extends layout
+
+block body
+  
+  style.
+
+    h2 {
+      color: #fff;
+      font-size: 20px;
+      margin-bottom: 20px;
+      margin-top: 60px;
+    }
+
+    form { 
+      margin: 0 auto;
+      max-width: 400px; 
+      //- position: relative;
+      //- top: 45%;
+      //- -webkit-transform: translateY(-50%);
+      //- -ms-transform: translateY(-50%);
+      //- transform: translateY(-50%);
+    }
+
+    input { 
+      margin-bottom: -1px; 
+      padding: 20px; 
+      width: 100%; 
+      outline: none;
+    }
+
+    .btn { 
+      border-radius: 0;
+      padding: 20px;
+      text-transform: uppercase;
+      font-weight: 300;
+      letter-spacing: 1px;
+    }
+
+    .logo {
+      margin-top: 20px;
+    }
+
+  .container.full-height
+    .row.full-height
+      .col-md-12.full-height
+        form(action="/signin", method="post").text-center
+          a(href='javascript:'): img.logo(src="/img/kalio.png", width="120px")
+          h2 !{session.account.namespace}
+          input.ph2(type="text", name="login", placeholder="Email")
+          input.ph2(type="password", name="password", placeholder="Mot de passe")
+          br
+          input.btn.btn-primary.btn-lg(type="submit", value="Connexion")
+          //- i.fontawesome-trash
+          //- | Connexion
+          //- i.entypo-right-circled
+
+
+block script
+
+  script.
+
+    var $vue = new Vue({ el: 'body' })
+    var query = querize()
+
+    if(query.login){
+      $('input:eq(0)').val(query.login)
+      $('input:eq(1)').focus()
+    }else
+      $('input:eq(0)').focus()
+
+

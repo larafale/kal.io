@@ -1,0 +1,32 @@
+doctype html
+
+html
+  head
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui')
+    meta(name='description', content='Outil de réservation - Créez des ressources, rendez-les réservables. Une personne, une salle, un véhicule ...')
+    title kal.io
+    //- <link href="//fonts.googleapis.com/css?family=Roboto:100italic,100,300italic,300,400italic,400,500italic,500,700italic,700,900italic,900" rel="stylesheet" type="text/css">
+    link(rel='stylesheet', type='text/css', href='/css/bootstrap.3.2.0.css')
+    link(rel='stylesheet', type='text/css', href='/css/utils.css')
+    link(rel='stylesheet', type='text/css', href='/css/site.css')
+    link(rel='stylesheet', type='text/css', href='/css/fa.css')
+    link(rel='stylesheet', type='text/css', href='/css/toastr.css')
+
+    style.
+      html, body {
+        height: 100%;
+      }
+      
+    
+  block js
+    script(src='/js/jquery.js')
+    script(src='/js/bootstrap.3.2.0.js')
+    script(src='/js/lodash.js')
+    script(src='/js/vue.0.11.5.js')
+    script(src='/js/toastr.min.js')
+    script(src='/js/fastclick.js')
+    script(src='/js/init.js')
+        
+  body
+    block body

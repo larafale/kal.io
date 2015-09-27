@@ -1,0 +1,164 @@
+
+include layoutStatic
+
+append block body
+
+  style.
+
+    .magnify {width: 200px; margin: 50px auto; position: relative;}
+    .small { display: block; }
+    .large {
+      width: 175px; height: 175px;
+      position: absolute;
+      border-radius: 100%;
+      box-shadow: 0 0 0 7px rgba(255, 255, 255, 0.85), 
+      0 0 7px 7px rgba(0, 0, 0, 0.25), 
+      inset 0 0 40px 2px rgba(0, 0, 0, 0.25);
+      background: url('/img/hero.png') no-repeat;
+      display: none;
+    }
+
+  section#header
+    .inner
+      a#logo(href='/')
+        img.logo(src="/img/kalio.png", width="160px")
+      nav
+        ul.list-unstyled
+          li: a(href='#price') Tarifs
+          li: a(href='#footer') Contact
+  
+  section#hero
+    .inner.animated.fadeIn
+      h1
+        | Vos réservations, 
+        strong Simplement.
+      h2 Créez des ressources, rendez-les réservables. Une personne, une salle, un véhicule ...
+      a.btn-main(href='#signup', onclick='setTimeout(function(){ $("#signup input:eq(0)").focus() }, 100)') Créer mon Kalio
+      figure.animated.fadeInUp.magnify
+        .large
+        img.small(src='/img/hero.png')
+
+  section#features
+    .col-4.wow.fadeInDown(data-wow-delay='.3s')
+      //- img(src='http://breach.cc/assets/images/feature-modular.png', alt='such modular')
+      i.fa.fa-laptop
+      i.fa.fa-tablet
+      i.fa.fa-mobile
+      div
+        h5 Tout Terrain
+        p
+          | Consultez ou prenez vos reservations depuis votre ordinateur, votre tablette ou votre mobile.
+          //- br
+          //- | Construct your own browsing experience by selecting the right modules for you.
+    .col-4.wow.fadeInDown(data-wow-delay='.6s')
+      //- img(src='http://breach.cc/assets/images/feature-hackable.png', alt='very hackable')
+      i.fa.fa-plane
+      i.fa.fa-child
+      i.fa.fa-futbol-o
+      div
+        h5 No Limit
+        p
+          | Créez des ressources, rendez les réservables. Associez une ressource à d'autre ressources.
+          //- br
+          //- | Every behavior is programmatic and exposed through APIs.
+    .col-4.wow.fadeInDown(data-wow-delay='.9s')
+      //- img(src='http://breach.cc/assets/images/feature-opensource.png', alt='so open source')
+      i.fa.fa-bell
+      i.fa.fa-bar-chart
+      i.fa.fa-wrench
+      div
+        h5 Indispensable
+        p
+          | Soyez notifié par mail/sms. Visualisez vos plannings en un clin d'oeuil et parametrez à volonté.
+
+
+  section#price
+    .inner
+
+      h1 30€ / mois
+
+      h4 
+        i.fa.fa-check-square
+        |   ressources illimitées
+      h4
+        i.fa.fa-check-square
+        |   sans engagement
+      h4
+        i.fa.fa-check-square
+        |   zéro frais d'installation
+      h4
+        i.fa.fa-check-square
+        |   1 mois d'essai gratuit
+
+  section#signup
+    .inner
+
+      h1 Créer mon Kalio
+      h4 1 mois d'essai gratuit
+
+      .container
+        .row
+          .col-md-4.col-md-offset-4
+            form.form 
+              .form-group
+                label url du calendrier
+                .prefix kal.io/
+                input.form-control(slug="namespace", type="text", v-model="signup.namespace", style="padding-left: 85px;")
+              //- .form-group
+              //-   label Nom de votre 1ere ressource
+              //-   input.form-control(slug="", type="text", v-model="signup.firstResource", placeholder="avion, salle, instructeur ...")
+              .form-group
+                label Email
+                input.form-control(slug="email", type="text", v-model="signup.email", placeholder="vous@domain.com")
+              .form-group
+                label Mot de passe
+                input.form-control(slug="password", type="password", v-model="signup.password")
+
+      button#signup-btn.btn-main(type='button', v-on='click: save()', data-loading-text="création en cours ...")
+        | Créer un Kalio
+
+  section#footer
+    .inner
+      p contact - hello@kal.io
+      p kal.io - 2005
+
+  script(type='text/javascript', src='/js/wow.min.js')
+  script(type='text/javascript', src='/js/index.js')
+  script(type='text/javascript', src='/js/magnify.js')
+  script.
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-63562817-1', 'auto');
+    ga('send', 'pageview');
+
+  script.
+
+    $(function() {
+
+      var $vue = new Vue({
+        el: 'body',
+        data: {
+          signup: {}
+        },
+        methods: {
+          save: function(){
+            $('#signup-btn').button('loading')
+
+            $.post("http://#{webUri}/api/signup", $vue.signup, function(data){
+              window.location = '/'+data.item.namespace+'?login='+$vue.signup.email
+              //- console.log('/'+data.item.namespace+'?login='+$vue.signup.email)
+            }).fail(function(data){
+              $err(null, { body: data.responseJSON || data.responseText, status: data.status })
+              $('#signup-btn').button('reset')
+              if(data.slug) $('#signup input[slug='+data.slug+']').focus()
+            })
+
+          }
+        }
+      })
+
+    });
+

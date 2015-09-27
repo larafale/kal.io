@@ -1,0 +1,39 @@
+
+.ph::-webkit-input-placeholder {
+  color: #909090;
+  position: relative;
+  -webkit-transform: translate(0, 0);
+  transition: all 0.2s ease-in-out;
+}
+
+.ph::-webkit-input-placeholder[style*=hidden] {
+  color: #909090;
+  font-size: 0.80em;
+  -webkit-transform: translate(-1em, -2em);
+  opacity: 1;
+  visibility: visible !important;
+}
+
+.ph2::-webkit-input-placeholder {
+  color: #909090;
+  position: relative;
+  -webkit-transform: translate(0, 0);
+  transition: all 0.2s ease-in-out;
+}
+
+.ph2::-webkit-input-placeholder[style*=hidden] {
+  color: #909090;
+  font-size: 0.80em;
+  -webkit-transform: translate(0em, -1em);
+  opacity: 1;
+  visibility: visible !important;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+.full-height {
+  height: 100%;
+}
+
