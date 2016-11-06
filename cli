@@ -1,0 +1,107 @@
+#!/usr/bin/env node
+
+process.env.NODE_ENV = 'production'
+
+var program = require('commander')
+  .version('0.0.1')
+  .usage('<command>')
+  .parse(process.argv)
+
+// if(!program.args.length) return program.help()
+// var command = program.args
+
+var async = require('async')
+	, _ = require('lodash')
+	, chalk = require('chalk')
+	, con = require('./services/con')
+	, config = require('./lib/config')
+	, db = require('./services/db')
+
+
+var $accounts = {}
+
+
+async.waterfall([
+
+	function(cb){
+		con.open(config.mongoUri, config.mongoOptions || {}, function(err){
+			if(err) console.log('cannot connect to database', config.mongoUri)
+			cb(err)
+		})
+	},
+
+	function(cb){
+		db.Account
+		  .find({})
+		  .exec(function(err, accounts){
+		  	_.each(accounts, function(a){
+			  	$accounts[a.namespace] = {
+			  			name: a.namespace
+			  		, record: a.record
+			  		, resources: []
+			  	}
+		  	})
+				cb()
+		  })
+	},
+
+	function(cb){
+		async.each(_.keys($accounts), function(a, cb){
+			db.Resource
+			  .find({ namespace: $accounts[a].record })
+			  .sort({ pos: 1 })
+			  .exec(function(err, resources){
+			  	$accounts[a].resources = resources
+					cb()
+			  })
+
+		}, cb)
+	},
+
+	function(cb){
+		async.each(_.keys($accounts), function(a, cb){
+			db.Block
+			  .find({ resource: { $in: _.pluck($accounts[a].resources, 'record') } })
+			  .exec(function(err, blocks){
+			  	$accounts[a].blocks = blocks.length
+					cb()
+			  })
+
+		}, cb)
+	},
+
+	function(cb){
+
+		_.each(_.keys($accounts), function(a){
+
+			a = $accounts[a]
+		  console.log(chalk.magenta.bold(a.name), chalk.green.bold(a.resources.length + ' resources'), chalk.yellow.bold(a.blocks + ' réza'))
+
+		  _.each(a.resources, function(r){
+		  	console.log('  ', r.pos, chalk.green(r.title))
+		  })
+			
+		})
+
+		cb()
+	}
+
+
+], function(err){
+
+	if(err) console.log(err)
+	process.exit(err ? 1 : 0)
+
+})
+
+
+// con.open(config.mongoUri, config.mongoOptions || {}, function(err){
+// 	if(err){
+// 		console.log('cannot connect to database', config.mongoUri)
+// 		process.exit(1)
+// 	} 
+
+  
+
+// })
+

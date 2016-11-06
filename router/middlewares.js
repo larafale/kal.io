@@ -65,7 +65,7 @@ module.exports = {
   },
 
   grant: function(role){
-    if(role == 'admin&current')
+    if(role == 'user')
       return function(req, res, next){
         return req.role == 'admin' || req.user.record == req.body.user
           ? next()

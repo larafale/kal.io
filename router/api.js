@@ -292,7 +292,7 @@ router.post('/blocks', mw.session, function(req, res){
     })
 })
 
-router.put('/blocks/:record', mw.session, mw.grant('admin&current'), function(req, res){
+router.put('/blocks/:record', mw.session, mw.grant('user'), function(req, res){
 
   db.Block
     .findOne({ record: req.params.record })
